@@ -29,6 +29,16 @@ SQL_QUERY = """
 """
 
 
+def get_total_count(conn):
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT COUNT(*) FROM DBA.acc_productphoto ph
+        INNER JOIN DBA.acc_product p ON ph.code = p.code
+        WHERE TRIM(p.settings) LIKE '#EC%'
+    """)
+    return cursor.fetchone()[0]
+
+
 def fetch_photos(conn):
     cursor = conn.cursor()
     cursor.execute(SQL_QUERY)

@@ -29,6 +29,12 @@ SQL_QUERY = """
 """
 
 
+def get_total_count(conn):
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM DBA.acc_productproduct WHERE TRIM(settings) LIKE '#EC%'")
+    return cursor.fetchone()[0]
+
+
 def fetch_products(conn):
     cursor = conn.cursor()
     cursor.execute(SQL_QUERY)

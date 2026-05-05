@@ -31,6 +31,16 @@ SQL_QUERY = """
 """
 
 
+def get_total_count(conn):
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT COUNT(*) FROM DBA.acc_productbatch b
+        INNER JOIN DBA.acc_product p ON b.productcode = p.code
+        WHERE TRIM(p.settings) LIKE '#EC%' AND TRIM(b.settings) LIKE '#EC%'
+    """)
+    return cursor.fetchone()[0]
+
+
 def fetch_batches(conn):
     cursor = conn.cursor()
     cursor.execute(SQL_QUERY)

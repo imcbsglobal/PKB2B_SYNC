@@ -25,6 +25,15 @@ SYNCS = [
     ("acc_productphoto",   sync_acc_productphoto),
 ]
 
+DISPLAY_NAMES = {
+    "acc_productproduct": "Products",
+    "acc_productbrand":   "Brands",
+    "acc_master":         "Customers",
+    "acc_product":        "Items",
+    "acc_productbatch":   "Barcodes",
+    "acc_productphoto":   "Photos",
+}
+
 BASE_URL    = "https://pkb2bsyncapi.myimc.in/api"
 SQL_USERNAME = "dba"
 SQL_PASSWORD = "(*$^)"
@@ -155,7 +164,7 @@ class SyncApp:
 
         self.rows = {}
         for name, _ in SYNCS:
-            iid = self.tree.insert("", "end", values=(name, "—", "—", "—"))
+            iid = self.tree.insert("", "end", values=(DISPLAY_NAMES[name], "—", "—", "—"))
             self.rows[name] = iid
 
         # ── Progress bar ────────────────────────────────────────
@@ -232,7 +241,7 @@ class SyncApp:
     def _set_row(self, name, status, total="—", dur="—"):
         colors = {"Syncing...": YELLOW, "Done": GREEN,
                   "Failed": RED, "Stopped": RED, "—": FG_DIM}
-        self.tree.item(self.rows[name], values=(name, status, total, dur))
+        self.tree.item(self.rows[name], values=(DISPLAY_NAMES[name], status, total, dur))
         tag = f"tag_{name}"
         self.tree.tag_configure(tag, foreground=colors.get(status, FG))
         self.tree.item(self.rows[name], tags=(tag,))
@@ -286,11 +295,18 @@ class SyncApp:
 
             try:
                 orig_push = mod.push_to_api
+                cfg = mod.load_config()
+                conn = mod.get_sql_connection(cfg)
+                total = mod.get_total_count(conn)
+                conn.close()
+                self._set_row(name, "Syncing...", f"0/{total}")
 
                 def patched_push(cfg, records, is_first_batch=False, _orig=orig_push):
                     nonlocal synced
                     result = _orig(cfg, records, is_first_batch)
                     synced += result.get("synced", 0)
+                    self._set_row(name, "Syncing...", f"{synced}/{total}")
+                    self.status_var.set(f"Syncing {name} ... {synced}/{total}")
                     return result
 
                 mod.push_to_api = patched_push
@@ -299,7 +315,7 @@ class SyncApp:
                 sys.stdout = sys.__stdout__
 
                 dur = f"{(datetime.now() - t0).seconds}s"
-                self._set_row(name, "Done", synced, dur)
+                self._set_row(name, "Done", f"{synced}/{total}", dur)
                 total_synced += synced
 
             except Exception as e:

@@ -28,6 +28,12 @@ SQL_QUERY = """
 """
 
 
+def get_total_count(conn):
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM DBA.acc_master WHERE TRIM(super_code) = 'DEBTO'")
+    return cursor.fetchone()[0]
+
+
 def fetch_masters(conn):
     cursor = conn.cursor()
     cursor.execute(SQL_QUERY)
