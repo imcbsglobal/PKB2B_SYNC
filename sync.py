@@ -85,6 +85,11 @@ class SyncApp:
         self.root.resizable(False, False)
         self.root.configure(bg=BG)
         self._stop_flag = False
+        self._auto_sync_job = None
+        self._countdown_job = None
+        self._countdown_secs = 0
+        cfg = load_config()
+        self._auto_sync_mins = int(cfg.get("auto_sync_minutes", 0))
         self._build_ui()
         self._check_connections()
 
@@ -209,6 +214,10 @@ class SyncApp:
         tk.Label(self.root, textvariable=self.summary_var,
                  font=("Segoe UI", 9, "bold"), bg=BG, fg=GREEN).pack(pady=(10, 0))
 
+        self.auto_sync_var = tk.StringVar(value="")
+        tk.Label(self.root, textvariable=self.auto_sync_var,
+                 font=("Segoe UI", 9), bg=BG, fg=BLUE).pack(pady=(4, 0))
+
     # ── connection check ─────────────────────────────────────────
     def _check_connections(self):
         self.sql_dot.config(text="● Checking...", fg=YELLOW)
@@ -267,6 +276,32 @@ class SyncApp:
 
     def end_sync(self):
         self._stop_flag = True
+        self._cancel_auto_sync()
+
+    def _cancel_auto_sync(self):
+        if self._auto_sync_job:
+            self.root.after_cancel(self._auto_sync_job)
+            self._auto_sync_job = None
+        if self._countdown_job:
+            self.root.after_cancel(self._countdown_job)
+            self._countdown_job = None
+        self.auto_sync_var.set("")
+
+    def _schedule_auto_sync(self):
+        if self._auto_sync_mins <= 0:
+            return
+        self._countdown_secs = self._auto_sync_mins * 60
+        self._tick_countdown()
+
+    def _tick_countdown(self):
+        if self._countdown_secs <= 0:
+            self.auto_sync_var.set("")
+            self.start_sync()
+            return
+        mins, secs = divmod(self._countdown_secs, 60)
+        self.auto_sync_var.set(f"⏱  Next auto sync in {mins:02d}:{secs:02d}")
+        self._countdown_secs -= 1
+        self._countdown_job = self.root.after(1000, self._tick_countdown)
 
     # ── run all syncs ────────────────────────────────────────────
     def _run_all(self):
@@ -334,6 +369,7 @@ class SyncApp:
         if not self._stop_flag:
             self.status_var.set("All syncs completed.")
             self.summary_var.set("✓  All syncs completed successfully.")
+            self._schedule_auto_sync()
 
         self.start_btn.configure(state="normal")
         self.stop_btn.configure(state="disabled")
