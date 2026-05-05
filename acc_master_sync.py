@@ -19,7 +19,7 @@ def get_sql_connection(cfg):
     return pyodbc.connect(f"DSN={cfg['dsn']};UID={SQL_USERNAME};PWD={SQL_PASSWORD}")
 
 
-BATCH_SIZE = 1000
+BATCH_SIZE = 200
 
 SQL_QUERY = """
     SELECT code, name, super_code, address, place, city, phone, phone2, remarkcolumntitle, gstin
@@ -55,7 +55,7 @@ BASE_URL = "https://pkb2bsyncapi.myimc.in/api"
 
 def push_to_api(cfg, records, is_first_batch=False):
     url = BASE_URL + "/master/sync/"
-    response = requests.post(url, json={"records": records, "is_first_batch": is_first_batch}, timeout=(10, 120))
+    response = requests.post(url, json={"records": records, "is_first_batch": is_first_batch}, timeout=(10, 300))
     response.raise_for_status()
     return response.json()
 
