@@ -8,6 +8,10 @@ import pyodbc
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
+import pystray
+from PIL import Image
+import ctypes
+import ctypes.wintypes
 
 from acc_productproduct_sync import run_sync as sync_acc_productproduct
 from acc_productbrand_sync import run_sync as sync_acc_productbrand
@@ -335,7 +339,54 @@ class SyncApp:
         self.stop_btn.configure(state="disabled")
 
 
+def _make_tray_image():
+    if getattr(sys, 'frozen', False):
+        base = sys._MEIPASS
+    else:
+        base = os.path.dirname(os.path.abspath(__file__))
+    ico = os.path.join(base, "pk.png")
+    if os.path.exists(ico):
+        return Image.open(ico).convert("RGBA").resize((64, 64))
+    img = Image.new("RGBA", (64, 64), (137, 180, 250, 255))
+    return img
+
+
 if __name__ == "__main__":
+    # ── Single instance check ────────────────────────────────────
+    _mutex = ctypes.windll.kernel32.CreateMutexW(None, True, "PKB2B_Sync_Mutex")
+    if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
+        ctypes.windll.user32.MessageBoxW(
+            None,
+            "PKB2B Sync Tool is already running.\nCheck the system tray.",
+            "Already Running",
+            0x40 | 0x1000  # MB_ICONINFORMATION | MB_SYSTEMMODAL
+        )
+        sys.exit(0)
+
     root = tk.Tk()
+    root.withdraw()
     app = SyncApp(root)
+
+    def show_window(icon=None, item=None):
+        root.deiconify()
+        root.lift()
+        root.focus()
+
+    def quit_app(icon, item):
+        icon.stop()
+        root.destroy()
+
+    tray_icon = pystray.Icon(
+        "PKB2B_Sync",
+        _make_tray_image(),
+        "PKB2B Sync Tool",
+        menu=pystray.Menu(
+            pystray.MenuItem("Show", show_window, default=True),
+            pystray.MenuItem("Exit", quit_app),
+        )
+    )
+
+    root.protocol("WM_DELETE_WINDOW", root.withdraw)
+
+    threading.Thread(target=tray_icon.run, daemon=True).start()
     root.mainloop()

@@ -30,9 +30,9 @@ def build():
         os.remove(f)
 
     # ── 2. Install dependencies ───────────────────────────────────
-    print("[BUILD] Installing PyInstaller and Pillow...")
+    print("[BUILD] Installing PyInstaller, Pillow and pystray...")
     subprocess.check_call(
-        [sys.executable, "-m", "pip", "install", "pyinstaller", "pillow"],
+        [sys.executable, "-m", "pip", "install", "pyinstaller", "pillow", "pystray"],
         stdout=subprocess.DEVNULL,
     )
 
@@ -52,6 +52,8 @@ def build():
         "--specpath", "build",
         "--windowed",
         "--icon", ico_path,
+        "--add-data", f"{os.path.abspath('pk.png')};.",
+        "--hidden-import", "pystray._win32",
         "sync.py",
     ])
 
