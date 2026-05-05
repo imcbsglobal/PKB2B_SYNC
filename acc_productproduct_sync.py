@@ -19,7 +19,7 @@ def get_sql_connection(cfg):
     return pyodbc.connect(f"DSN={cfg['dsn']};UID={SQL_USERNAME};PWD={SQL_PASSWORD}")
 
 
-BATCH_SIZE = 100
+BATCH_SIZE = 1000
 BASE_URL = "https://pkb2bsyncapi.myimc.in/api"
 
 SQL_QUERY = """
@@ -31,6 +31,7 @@ SQL_QUERY = """
 
 def fetch_products(conn):
     cursor = conn.cursor()
+    cursor.timeout = 0
     cursor.execute(SQL_QUERY)
     while True:
         rows = cursor.fetchmany(BATCH_SIZE)
@@ -42,7 +43,7 @@ def fetch_products(conn):
 
 def push_to_api(cfg, records, is_first_batch=False):
     url = BASE_URL + "/products/sync/"
-    response = requests.post(url, json={"records": records, "is_first_batch": is_first_batch})
+    response = requests.post(url, json={"records": records, "is_first_batch": is_first_batch}, timeout=(10, 120))
     response.raise_for_status()
     return response.json()
 
