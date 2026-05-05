@@ -296,18 +296,18 @@ class SyncApp:
                 mod.push_to_api = patched_push
                 fn()
                 mod.push_to_api = orig_push
+                sys.stdout = sys.__stdout__
 
                 dur = f"{(datetime.now() - t0).seconds}s"
                 self._set_row(name, "Done", synced, dur)
                 total_synced += synced
 
             except Exception as e:
+                sys.stdout = sys.__stdout__
                 mod.push_to_api = orig_push
                 self._set_row(name, "Failed", "—", "—")
                 self.status_var.set(f"Error in {name}: {e}")
-
-            finally:
-                sys.stdout = sys.__stdout__
+                import traceback; traceback.print_exc()
 
             self.progress["value"] = idx + 1
 

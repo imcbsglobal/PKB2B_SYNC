@@ -31,7 +31,6 @@ SQL_QUERY = """
 
 def fetch_products(conn):
     cursor = conn.cursor()
-    cursor.timeout = 0
     cursor.execute(SQL_QUERY)
     while True:
         rows = cursor.fetchmany(BATCH_SIZE)
