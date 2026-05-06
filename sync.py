@@ -84,7 +84,7 @@ class SyncApp:
     def __init__(self, root):
         self.root = root
         self.root.title("PKB2B Sync Tool")
-        self.root.geometry("700x610")
+        self.root.geometry("700x650")
         self.root.resizable(False, False)
         self.root.configure(bg=BG)
         self._stop_flag = False
@@ -409,9 +409,10 @@ if __name__ == "__main__":
 
     def show_window(icon=None, item=None):
         root.deiconify()
-        root.state("zoomed")
+        root.state("normal")
         root.lift()
         root.focus()
+        root.after(200, lambda: app.start_sync() if app.start_btn["state"] == "normal" else None)
 
     def quit_app(icon, item):
         icon.stop()
