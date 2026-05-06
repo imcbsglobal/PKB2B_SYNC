@@ -19,6 +19,7 @@ from acc_master_sync import run_sync as sync_acc_master
 from acc_product_sync import run_sync as sync_acc_product
 from acc_productbatch_sync import run_sync as sync_acc_productbatch
 from acc_productphoto_sync import run_sync as sync_acc_productphoto
+from acc_users_sync import run_sync as sync_acc_users
 
 SYNCS = [
     ("acc_productproduct", sync_acc_productproduct),
@@ -27,6 +28,7 @@ SYNCS = [
     ("acc_product",        sync_acc_product),
     ("acc_productbatch",   sync_acc_productbatch),
     ("acc_productphoto",   sync_acc_productphoto),
+    ("acc_users",          sync_acc_users),
 ]
 
 DISPLAY_NAMES = {
@@ -36,6 +38,7 @@ DISPLAY_NAMES = {
     "acc_product":        "Items",
     "acc_productbatch":   "Barcodes",
     "acc_productphoto":   "Photos",
+    "acc_users":          "Users",
 }
 
 BASE_URL    = "https://pkb2bsyncapi.myimc.in/api"
@@ -81,7 +84,7 @@ class SyncApp:
     def __init__(self, root):
         self.root = root
         self.root.title("PKB2B Sync Tool")
-        self.root.geometry("700x580")
+        self.root.geometry("700x610")
         self.root.resizable(False, False)
         self.root.configure(bg=BG)
         self._stop_flag = False
@@ -313,6 +316,7 @@ class SyncApp:
             "acc_product":        "acc_product_sync",
             "acc_productbatch":   "acc_productbatch_sync",
             "acc_productphoto":   "acc_productphoto_sync",
+            "acc_users":          "acc_users_sync",
         }
 
         for idx, (name, fn) in enumerate(SYNCS):
@@ -405,6 +409,7 @@ if __name__ == "__main__":
 
     def show_window(icon=None, item=None):
         root.deiconify()
+        root.state("zoomed")
         root.lift()
         root.focus()
 
@@ -422,7 +427,7 @@ if __name__ == "__main__":
         )
     )
 
-    root.protocol("WM_DELETE_WINDOW", root.withdraw)
+    root.protocol("WM_DELETE_WINDOW", lambda: (root.state("normal"), root.withdraw()))
 
     threading.Thread(target=tray_icon.run, daemon=True).start()
     root.mainloop()
