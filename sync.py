@@ -20,6 +20,7 @@ from acc_product_sync import run_sync as sync_acc_product
 from acc_productbatch_sync import run_sync as sync_acc_productbatch
 from acc_productphoto_sync import run_sync as sync_acc_productphoto
 from acc_users_sync import run_sync as sync_acc_users
+from acc_servicemaster_sync import run_sync as sync_acc_servicemaster
 
 SYNCS = [
     ("acc_productproduct", sync_acc_productproduct),
@@ -29,6 +30,7 @@ SYNCS = [
     ("acc_productbatch",   sync_acc_productbatch),
     ("acc_productphoto",   sync_acc_productphoto),
     ("acc_users",          sync_acc_users),
+    ("acc_servicemaster",  sync_acc_servicemaster),
 ]
 
 DISPLAY_NAMES = {
@@ -39,6 +41,7 @@ DISPLAY_NAMES = {
     "acc_productbatch":   "Barcodes",
     "acc_productphoto":   "Photos",
     "acc_users":          "Users",
+    "acc_servicemaster":  "Service Sections",
 }
 
 BASE_URL    = "https://pkb2bsyncapi.myimc.in/api"
@@ -317,6 +320,7 @@ class SyncApp:
             "acc_productbatch":   "acc_productbatch_sync",
             "acc_productphoto":   "acc_productphoto_sync",
             "acc_users":          "acc_users_sync",
+            "acc_servicemaster":  "acc_servicemaster_sync",
         }
 
         for idx, (name, fn) in enumerate(SYNCS):
