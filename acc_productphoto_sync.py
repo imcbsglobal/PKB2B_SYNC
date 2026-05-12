@@ -25,30 +25,14 @@ SQL_QUERY = """
     SELECT ph.code, ph.url2
     FROM DBA.acc_productphoto ph
     INNER JOIN DBA.acc_product p ON ph.code = p.code
-    WHERE ph.slno = (
-        SELECT MIN(ph2.slno)
-        FROM DBA.acc_productphoto ph2
-        WHERE ph2.code = ph.code
-        AND ph2.favourite = '1'
-    )
-    OR (
-        ph.favourite != '1'
-        AND NOT EXISTS (
-            SELECT 1 FROM DBA.acc_productphoto ph3
-            WHERE ph3.code = ph.code AND ph3.favourite = '1'
-        )
-        AND ph.slno = (
-            SELECT MIN(ph4.slno) FROM DBA.acc_productphoto ph4
-            WHERE ph4.code = ph.code
-        )
-    )
+    ORDER BY ph.code, ph.slno
 """
 
 
 def get_total_count(conn):
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT COUNT(DISTINCT ph.code)
+        SELECT COUNT(*)
         FROM DBA.acc_productphoto ph
         INNER JOIN DBA.acc_product p ON ph.code = p.code
     """)
