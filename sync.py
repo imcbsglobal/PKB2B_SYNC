@@ -416,7 +416,6 @@ if __name__ == "__main__":
         root.state("normal")
         root.lift()
         root.focus()
-        root.after(200, lambda: app.start_sync() if app.start_btn["state"] == "normal" else None)
 
     def quit_app(icon, item):
         icon.stop()
