@@ -387,7 +387,7 @@ class SyncApp:
         self.stop_btn.configure(state="disabled")
 
 
-def _make_tray_image():
+def _make_tray_image(): 
     if getattr(sys, 'frozen', False):
         base = sys._MEIPASS
     else:
