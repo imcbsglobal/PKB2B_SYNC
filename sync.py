@@ -94,6 +94,7 @@ class SyncApp:
         self._auto_sync_job = None
         self._countdown_job = None
         self._countdown_secs = 0
+        self._auto_start = True
         cfg = load_config()
         self._auto_sync_mins = int(cfg.get("auto_sync_minutes", 0))
         self._build_ui()
@@ -247,6 +248,9 @@ class SyncApp:
         if sql_ok and api_ok:
             self.start_btn.configure(state="normal")
             self.status_var.set("Ready to sync.")
+            if self._auto_start:
+                self._auto_start = False
+                self.root.after(200, self.start_sync)
         else:
             self.start_btn.configure(state="disabled")
             self.status_var.set("Cannot sync: check connection status above.")
