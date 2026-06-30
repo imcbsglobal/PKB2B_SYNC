@@ -20,7 +20,7 @@ BATCH_SIZE = 200
 SQL_QUERY = '''
     SELECT slno, name, code, "type", url
     FROM DBA.acc_tt_servicemaster
-    WHERE "type" = 'Section'
+    WHERE "type" IN ('Section', 'Area')
 '''
 
 
@@ -30,13 +30,13 @@ def get_sql_connection(cfg):
 
 def get_total_count(conn):
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM DBA.acc_tt_servicemaster WHERE \"type\" = 'Section'")
+    cursor.execute("SELECT COUNT(*) FROM DBA.acc_tt_servicemaster WHERE \"type\" IN ('Section', 'Area')")
     total = cursor.fetchone()[0]
     cursor.close()
     return total
 
 
-def fetch_sections(conn):
+def fetch_records(conn):
     cursor = conn.cursor()
     cursor.execute(SQL_QUERY)
     while True:
@@ -48,6 +48,7 @@ def fetch_sections(conn):
             "name": r[1],
             "code": r[2],
             "type": r[3],
+            "category": r[3],
             "url": r[4],
         } for r in rows]
     cursor.close()
@@ -70,8 +71,8 @@ def run_sync():
     print("[SYNC] Connected successfully")
 
     try:
-        print("[SYNC] Fetching acc_tt_servicemaster WHERE type = 'Section'")
-        for i, batch in enumerate(fetch_sections(conn)):
+        print("[SYNC] Fetching acc_tt_servicemaster WHERE type IN ('Section', 'Area')")
+        for i, batch in enumerate(fetch_records(conn)):
             result = push_to_api(cfg, batch, is_first_batch=(i == 0))
             print(f"  -> Pushed {len(batch)} records | Response: {result}")
     finally:

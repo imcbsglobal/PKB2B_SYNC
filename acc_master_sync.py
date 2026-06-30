@@ -22,7 +22,7 @@ def get_sql_connection(cfg):
 BATCH_SIZE = 200
 
 SQL_QUERY = """
-    SELECT code, name, super_code, address, place, city, phone, phone2, remarkcolumntitle, gstin
+    SELECT code, name, super_code, address, place, city, phone, phone2, remarkcolumntitle, gstin, area
     FROM DBA.acc_master
     WHERE TRIM(super_code) = 'DEBTO'
 """
@@ -51,7 +51,8 @@ def fetch_masters(conn):
             "phone": r[6],
             "phone2": r[7],
             "remarkcolumntitle": r[8],
-            "gstin": r[9]
+            "gstin": r[9],
+            "area": r[10]
         } for r in rows]
     cursor.close()
 
