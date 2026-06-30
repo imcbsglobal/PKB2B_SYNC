@@ -28,6 +28,7 @@ SQL_QUERY = """
     INNER JOIN DBA.acc_product p ON b.productcode = p.code
     WHERE TRIM(p.settings) LIKE '#EC%'
     AND TRIM(b.settings) LIKE '#EC%'
+    AND b.barcode IS NOT NULL
 """
 
 
@@ -37,6 +38,7 @@ def get_total_count(conn):
         SELECT COUNT(*) FROM DBA.acc_productbatch b
         INNER JOIN DBA.acc_product p ON b.productcode = p.code
         WHERE TRIM(p.settings) LIKE '#EC%' AND TRIM(b.settings) LIKE '#EC%'
+        AND b.barcode IS NOT NULL
     """)
     return cursor.fetchone()[0]
 

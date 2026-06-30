@@ -25,6 +25,12 @@ SQL_QUERY = """
     SELECT ph.code, ph.url2
     FROM DBA.acc_productphoto ph
     INNER JOIN DBA.acc_product p ON ph.code = p.code
+    WHERE EXISTS (
+        SELECT 1 FROM DBA.acc_productbatch b
+        WHERE b.productcode = p.code
+        AND b.barcode IS NOT NULL
+        AND TRIM(b.settings) LIKE '#EC%'
+    )
     ORDER BY ph.code, ph.slno
 """
 
@@ -35,6 +41,12 @@ def get_total_count(conn):
         SELECT COUNT(*)
         FROM DBA.acc_productphoto ph
         INNER JOIN DBA.acc_product p ON ph.code = p.code
+        WHERE EXISTS (
+            SELECT 1 FROM DBA.acc_productbatch b
+            WHERE b.productcode = p.code
+            AND b.barcode IS NOT NULL
+            AND TRIM(b.settings) LIKE '#EC%'
+        )
     """)
     return cursor.fetchone()[0]
 

@@ -23,14 +23,29 @@ BATCH_SIZE = 200
 
 SQL_QUERY = """
     SELECT code, name, text3, text5, unit, taxcode, company, product, brand, text6, nameinsl, settings, properties
-    FROM DBA.acc_product
-    WHERE TRIM(settings) LIKE '#EC%'
+    FROM DBA.acc_product p
+    WHERE TRIM(p.settings) LIKE '#EC%'
+    AND EXISTS (
+        SELECT 1 FROM DBA.acc_productbatch b
+        WHERE b.productcode = p.code
+        AND b.barcode IS NOT NULL
+        AND TRIM(b.settings) LIKE '#EC%'
+    )
 """
 
 
 def get_total_count(conn):
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM DBA.acc_product WHERE TRIM(settings) LIKE '#EC%'")
+    cursor.execute("""
+        SELECT COUNT(*) FROM DBA.acc_product p
+        WHERE TRIM(p.settings) LIKE '#EC%'
+        AND EXISTS (
+            SELECT 1 FROM DBA.acc_productbatch b
+            WHERE b.productcode = p.code
+            AND b.barcode IS NOT NULL
+            AND TRIM(b.settings) LIKE '#EC%'
+        )
+    """)
     return cursor.fetchone()[0]
 
 
